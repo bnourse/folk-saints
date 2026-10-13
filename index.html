@@ -1,0 +1,467 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Folk Saints Directory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a stack of holy cards under a sticky filter rail; cards flow in a responsive grid. */
+:root {
+  --bg: #e9ecf0;
+  --card: #fbfcfd;
+  --ink: #1b2130;
+  --muted: #586174;
+  --line: #cfd5de;
+  --accent: #29468f;
+  --gold: #a87a1d;
+  --k-folk: #29468f;
+  --k-deified: #4f6a7c;
+  --k-suppressed: #8c2f2f;
+  --k-later: #2e7259;
+  --k-meme: #8a4fa3;
+  --k-political: #b0661a;
+  --k-art: #a03c64;
+  --tag-bg: #e4e8ee;
+  --font-display: "IM Fell English", "Iowan Old Style", Georgia, serif;
+  --font-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11141b; --card: #1a1e28; --ink: #e8ebf1; --muted: #9ba3b4; --line: #2c3240;
+    --accent: #93acf0; --gold: #d8aa4b; --tag-bg: #232937;
+    --k-folk: #93acf0; --k-deified: #9ab8cc; --k-suppressed: #e58c8c; --k-later: #7fcfae; --k-meme: #cfa2e3; --k-political: #eeac66; --k-art: #f08fb5;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11141b; --card: #1a1e28; --ink: #e8ebf1; --muted: #9ba3b4; --line: #2c3240;
+  --accent: #93acf0; --gold: #d8aa4b; --tag-bg: #232937;
+  --k-folk: #93acf0; --k-deified: #9ab8cc; --k-suppressed: #e58c8c; --k-later: #7fcfae; --k-meme: #cfa2e3; --k-political: #eeac66; --k-art: #f08fb5;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.5; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 56px; }
+header.intro { display: grid; gap: 10px; max-width: 68ch; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
+h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(2.2rem, 6vw, 3.4rem); line-height: 1.05; margin: 0; text-wrap: balance; }
+.intro p { margin: 0; color: var(--muted); }
+
+.rail { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding-block: 14px; margin-top: 20px; border-bottom: 1px solid var(--line); display: grid; gap: 10px; }
+.search { width: 100%; font: inherit; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--ink); }
+.search:focus-visible, .chip:focus-visible, select:focus-visible, .clear:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chip { font: 600 13px/1 var(--font-body); padding: 7px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
+.chip .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c, var(--muted)); }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.selects { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+select { font: inherit; font-size: 14px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--ink); max-width: 100%; }
+.clear { font: 600 13px/1 var(--font-body); background: none; border: 0; color: var(--accent); cursor: pointer; padding: 6px 4px; }
+.count { font-family: var(--font-mono); font-size: 12px; color: var(--muted); margin-left: auto; font-variant-numeric: tabular-nums; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px; margin-top: 20px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 4px; padding: 16px 16px 14px; display: grid; gap: 8px; align-content: start; position: relative; min-width: 0; }
+.card::before { content: ""; position: absolute; inset: 5px; border: 1px solid var(--line); border-radius: 2px; pointer-events: none; opacity: .7; }
+.card > * { position: relative; }
+.meta { display: flex; justify-content: space-between; gap: 8px; font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); letter-spacing: .02em; }
+.card h2 { font-family: var(--font-display); font-weight: 400; font-size: 1.5rem; line-height: 1.15; margin: 0; text-wrap: balance; }
+.alias { font-size: 13px; color: var(--muted); margin-top: -4px; }
+.patron { font-family: var(--font-display); font-style: italic; color: var(--gold); font-size: 1rem; }
+.note { margin: 0; font-size: 15px; }
+.foot { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; justify-content: space-between; }
+.kind { font: 600 11px/1 var(--font-body); letter-spacing: .06em; text-transform: uppercase; color: var(--c); display: inline-flex; gap: 6px; align-items: center; }
+.kind .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--c); }
+.tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.tag { font: 500 11px/1 var(--font-mono); padding: 4px 6px; border-radius: 3px; background: var(--tag-bg); color: var(--muted); }
+.wiki { flex: none; color: var(--accent); text-decoration: none; font-weight: 500; white-space: nowrap; }
+.wiki:hover { text-decoration: underline; }
+.wiki:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+.empty { color: var(--muted); padding: 32px 0; }
+footer { margin-top: 40px; max-width: 68ch; color: var(--muted); font-size: 14px; display: grid; gap: 8px; }
+footer h3 { font-family: var(--font-display); font-weight: 400; font-size: 1.3rem; color: var(--ink); margin: 0; }
+@media (prefers-reduced-motion: no-preference) { .card { transition: transform .15s ease; } .card:hover { transform: translateY(-2px); } }
+</style>
+
+<div class="wrap">
+  <header class="intro">
+    <div class="eyebrow">Unofficial, suppressed &amp; newly minted</div>
+    <h1>Folk Saints Directory</h1>
+    <p>Holy figures people made for themselves, across every faith: medieval cults the Church shut down, Sufi shrines Hindus visit too, roadside heroes who became gods, figures venerated long before any authority caught up, and today's ironic candles and wartime memes.</p>
+  </header>
+
+  <div class="rail">
+    <input id="q" class="search" type="search" placeholder="Search names, places, patronages…" aria-label="Search">
+    <div class="filters" id="kinds" role="group" aria-label="Filter by kind"></div>
+    <div class="selects">
+      <select id="trad" aria-label="Tradition"></select>
+      <select id="region" aria-label="Region"></select>
+      <select id="era" aria-label="Era"></select>
+      <button class="clear" id="clear" type="button">Clear filters</button>
+      <span class="count" id="count"></span>
+    </div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+  <p class="empty" id="empty" hidden>Nothing matches those filters. Clear the search or reset the filters to see more.</p>
+
+  <footer>
+    <h3>About this list</h3>
+    <p>"Era" is when devotion took hold, not necessarily when the person lived. Dates for legendary figures are traditional. A figure honored across faiths carries every tradition that honors it, so it shows up under each one.</p>
+    <p>"Suppressed or de-listed" and "Popular first, canonized later" refer to the relevant religious or civil authority: usually the Catholic or Orthodox Church, sometimes a state.</p>
+    <p>Left out on purpose: the online "saints" culture that venerates mass shooters. It is documented by extremism researchers, but listing those names would serve its purpose.</p>
+  </footer>
+</div>
+
+<script>
+const KINDS = {
+  folk:       { label: "Folk devotion",                  c: "--k-folk" },
+  deified:    { label: "Became gods or spirits",         c: "--k-deified" },
+  later:      { label: "Popular first, canonized later", c: "--k-later" },
+  suppressed: { label: "Suppressed or de-listed",        c: "--k-suppressed" },
+  political:  { label: "Political & celebrity",          c: "--k-political" },
+  meme:       { label: "Meme, ironic & merch",           c: "--k-meme" },
+  art:        { label: "Began as art or commentary",     c: "--k-art" }
+};
+const TRADS = ["Catholic", "Orthodox Christian", "Other Christian", "Islam", "Judaism", "Hindu", "Sikh", "Buddhist", "Chinese folk & Taoist", "Shinto", "East & Southeast Asian spirit traditions", "Afro-diasporic", "Indigenous & syncretic", "Spiritist", "Parody & satirical religions", "Secular & internet"];
+const ERAS = ["Before 1500", "1500–1899", "1900–1999", "2000–now"];
+const REGIONS = ["Mexico & Central America", "South America", "Caribbean & North America", "Europe", "Africa", "Middle East & North Africa", "South Asia", "East & Southeast Asia", "Online / global"];
+
+const S = [
+  // ======== Christian Europe
+  { n: "Saint Guinefort", p: "Dombes, near Lyon, France", r: "Europe", e: "Before 1500", d: "c. 1250", k: "suppressed", tr: ["Catholic"], pat: "Protector of infants",
+    t: "A greyhound killed by its master, who wrongly thought it had attacked his baby. Peasants venerated its grave; a Dominican inquisitor ordered the cult destroyed, but local devotion reportedly lingered for centuries." },
+  { n: "Saint Wilgefortis", a: "Saint Uncumber, Liberata", p: "Iberia, Low Countries, Germany, England", r: "Europe", e: "Before 1500", d: "14th c.", k: "suppressed", tr: ["Catholic"], pat: "Women seeking freedom from unwanted husbands",
+    t: "A crucified bearded maiden who prayed to be made ugly to escape a forced marriage. Likely born from a misread robed crucifix; removed from the Roman Martyrology in 1969." },
+  { n: "Saint Josaphat", a: "Barlaam and Josaphat", p: "Medieval Christendom", r: "Europe", e: "Before 1500", d: "11th c. onward", k: "suppressed", tr: ["Catholic", "Orthodox Christian", "Buddhist"], pat: "Hermits and converts",
+    t: "A Christianized retelling of the life of the Buddha that spread across medieval Europe. Josaphat and his teacher Barlaam were commemorated in church calendars for centuries." },
+  { n: "Thomas of Lancaster", p: "Pontefract, England", r: "Europe", e: "Before 1500", d: "1322", k: "folk", tr: ["Catholic"], pat: "Opposition to royal tyranny",
+    t: "A rebel earl executed by Edward II. Miracles were soon reported at his tomb and a canonization campaign followed, but it never succeeded." },
+  { n: "Simon de Montfort", p: "Evesham, England", r: "Europe", e: "Before 1500", d: "1265", k: "suppressed", tr: ["Catholic"], pat: "Political reformers",
+    t: "The baronial leader killed at Evesham drew pilgrims and miracle stories. The crown banned the cult, which faded within a generation." },
+  { n: "King Henry VI", p: "Windsor, England", r: "Europe", e: "Before 1500", d: "1471 onward", k: "folk", tr: ["Catholic"], pat: "Healing; rescue from accidents",
+    t: "The deposed king, likely murdered in the Tower, became one of England's most popular unofficial saints. Henry VII pushed for canonization; the Reformation ended it." },
+  { n: "Simon of Trent", p: "Trento, Italy", r: "Europe", e: "Before 1500", d: "1475", k: "suppressed", tr: ["Catholic"], pat: "(Cult built on a blood libel)",
+    t: "A toddler whose death was falsely blamed on the local Jewish community, leading to executions. The cult rested on antisemitic fabrication and was formally abolished in 1965." },
+  { n: "Saint Philomena", p: "Mugnano, Italy", r: "Europe", e: "1500–1899", d: "1802", k: "suppressed", tr: ["Catholic"], pat: "Children, babies, lost causes",
+    t: "Bones found in a Roman catacomb in 1802 launched one of the 19th century's biggest devotions. Doubts about her identity led to her feast being dropped in 1961." },
+  { n: "Sara-la-Kali", a: "Black Sara", p: "Saintes-Maries-de-la-Mer, France", r: "Europe", e: "1500–1899", d: "Pilgrimage each May", k: "folk", tr: ["Catholic"], pat: "The Roma",
+    t: "Never canonized, she is the patron of Roma travellers, whose statue is carried into the sea during the annual pilgrimage in the Camargue." },
+  { n: "Xenia of St Petersburg", p: "Smolensky Cemetery, St Petersburg, Russia", r: "Europe", e: "1500–1899", d: "18th c.", k: "later", tr: ["Orthodox Christian"], pat: "Marriage, work, housing",
+    t: "A young widow who gave everything away and wandered the city in her late husband's clothes as a holy fool. People left notes at her grave chapel for two centuries before her canonization in 1988." },
+  { n: "Matrona of Moscow", p: "Pokrovsky Monastery, Moscow", r: "Europe", e: "1900–1999", d: "d. 1952", k: "later", tr: ["Orthodox Christian"], pat: "Healing, family troubles",
+    t: "A blind peasant healer consulted by Muscovites through the Soviet years. Her relics draw long queues, and popular devotion came well before her canonization in 1999." },
+  { n: "Stalin icons", p: "Russia", r: "Europe", e: "2000–now", d: "2000s", k: "political", tr: ["Orthodox Christian", "Secular & internet"], pat: "Russian state power",
+    t: "Fringe nationalist groups have promoted icons of Stalin, including one showing Saint Matrona blessing him. The Russian Orthodox Church has rejected the idea of venerating him." },
+  { n: "Padre Pio", p: "San Giovanni Rotondo, Italy", r: "Europe", e: "1900–1999", d: "Stigmata 1918", k: "later", tr: ["Catholic"], pat: "Stress relief, the suffering",
+    t: "Investigated and restricted by the Vatican for decades, the stigmatic friar had a massive popular following. Canonized in 2002." },
+  { n: "Princess Diana", p: "Althorp; Paris; worldwide", r: "Europe", e: "1900–1999", d: "d. 1997", k: "political", tr: ["Secular & internet"], pat: "Compassion; the outcast",
+    t: "Mass mourning took on devotional forms: shrines, candles, relic-like souvenirs, and a sea of flowers in front of Kensington Palace." },
+  { n: "John Paul II", a: "'Santo subito!'", p: "Vatican; Poland", r: "Europe", e: "2000–now", d: "2005", k: "later", tr: ["Catholic"], pat: "Youth, families",
+    t: "Crowds chanted 'sainthood now!' at his funeral. The waiting period was waived, and he was canonized in 2014." },
+
+  // ======== Africa
+  { n: "Kimpa Vita", a: "Dona Beatriz", p: "Kingdom of Kongo", r: "Africa", e: "1500–1899", d: "1706", k: "folk", tr: ["Catholic"], pat: "Kongolese unity",
+    t: "A young prophet who said Saint Anthony possessed her and preached a Kongolese Christianity. Burned for heresy, she is honored today as a national heroine." },
+  { n: "Simon Kimbangu", p: "Nkamba, DR Congo", r: "Africa", e: "1900–1999", d: "d. 1951", k: "folk", tr: ["Other Christian"], pat: "Healing; African dignity",
+    t: "A healer-prophet jailed by Belgian authorities for decades. The Kimbanguist Church, one of Africa's largest independent churches, honors him today." },
+  { n: "Amadou Bamba", p: "Touba, Senegal", r: "Africa", e: "1900–1999", d: "d. 1927", k: "folk", tr: ["Islam"], pat: "Work, discipline, the Mouride faithful",
+    t: "Founder of the Mouride Sufi brotherhood, exiled by French colonial authorities. The Grand Magal of Touba, marking the start of his exile, draws millions of pilgrims each year." },
+
+  // ======== Middle East & North Africa
+  { n: "Al-Khidr", a: "Khwaja Khizr, the Green One", p: "Across the Islamic world and South Asia", r: "Middle East & North Africa", e: "Before 1500", d: "Ancient", k: "folk", tr: ["Islam", "Hindu"], pat: "Travelers, water, the lost",
+    t: "A mysterious sage from the Qur'an's story of Moses, said to wander the earth forever. In South Asia he is also Khwaja Khizr, a river spirit honored by Hindus and Muslims with floating lamps." },
+  { n: "Sayyida Zaynab", p: "Cairo, Egypt", r: "Middle East & North Africa", e: "Before 1500", d: "Mawlid each year", k: "folk", tr: ["Islam"], pat: "The poor, the sick",
+    t: "The Prophet's granddaughter, whose Cairo shrine hosts one of Egypt's biggest mawlid festivals, with Sufi chanting, street food, and fairground rides. Some strict clerics condemn such festivals." },
+  { n: "Bouya Omar", p: "El Kelaa des Sraghna, Morocco", r: "Middle East & North Africa", e: "1500–1899", d: "Evacuated June 2015", k: "suppressed", tr: ["Islam"], pat: "The mentally ill (believed possessed by jinn)",
+    t: "A saint's shrine where families left mentally ill and addicted relatives, often chained for years, hoping to drive out jinn. After years of outcry, Morocco's government evacuated the residents in 2015." },
+  { n: "Rabbi Amram Ben Diwan", p: "Near Ouazzane, Morocco", r: "Middle East & North Africa", e: "1500–1899", d: "18th c.", k: "folk", tr: ["Judaism"], pat: "Healing, fertility",
+    t: "A rabbi from Hebron whose grave in northern Morocco draws Jewish pilgrims from around the world for an annual hillula of candles, prayer, and feasting." },
+  { n: "Rabbi Shimon bar Yochai", p: "Meron, Israel", r: "Middle East & North Africa", e: "Before 1500", d: "Lag BaOmer", k: "folk", tr: ["Judaism"], pat: "Kabbalah; blessings; a child's first haircut",
+    t: "A 2nd-century sage traditionally credited with the Zohar. Huge crowds light bonfires at his tomb on Lag BaOmer; a crush there in 2021 killed 45 people." },
+  { n: "Baba Sali", a: "Rabbi Yisrael Abuhatzeira", p: "Netivot, Israel", r: "Middle East & North Africa", e: "1900–1999", d: "d. 1984", k: "folk", tr: ["Judaism"], pat: "Blessings, healing",
+    t: "A Moroccan-born kabbalist whose tomb draws tens of thousands on his yahrzeit, in the North African tradition of hillulot at saints' graves." },
+
+  { n: "Rabbi Nachman of Breslov", p: "Uman, Ukraine", r: "Europe", e: "1500–1899", d: "d. 1810", k: "folk", tr: ["Judaism"], pat: "Joy, repentance, spiritual rescue",
+    t: "A Hasidic master who promised to help anyone who prays at his grave. Tens of thousands of pilgrims gather in Uman each Rosh Hashanah, and many kept coming even during the war." },
+
+  // ======== South Asia
+  { n: "Data Ganj Bakhsh", a: "Ali Hujwiri", p: "Lahore, Pakistan", r: "South Asia", e: "Before 1500", d: "11th c.", k: "folk", tr: ["Islam"], pat: "The hungry; seekers of blessing",
+    t: "A Persian Sufi scholar whose shrine, Data Darbar, is one of South Asia's busiest. It feeds huge numbers of visitors every day." },
+  { n: "Nizamuddin Auliya", p: "Delhi, India", r: "South Asia", e: "Before 1500", d: "d. 1325", k: "folk", tr: ["Islam", "Hindu"], pat: "Love, spiritual longing",
+    t: "A Chishti Sufi master whose dargah fills with qawwali singing on Thursday evenings. People of every faith come to pray and make wishes." },
+  { n: "Lal Shahbaz Qalandar", p: "Sehwan Sharif, Pakistan", r: "South Asia", e: "Before 1500", d: "13th c.", k: "folk", tr: ["Islam", "Hindu"], pat: "Mystics, the marginalized",
+    t: "A Sufi saint whose shrine hosts ecstatic nightly dhamaal drumming and dancing, drawing devotees of many faiths." },
+  { n: "Sakhi Sarwar", p: "Dera Ghazi Khan, Pakistan; Punjab", r: "South Asia", e: "Before 1500", d: "12th c.", k: "folk", tr: ["Islam", "Hindu", "Sikh"], pat: "Children, healing, livestock",
+    t: "A Sufi pir whose followers once crossed religious lines across Punjab, with Hindus and Sikhs among his most devoted pilgrims." },
+  { n: "Ramdev Pir", a: "Baba Ramdev, Ramsa Pir", p: "Ramdevra, Rajasthan, India", r: "South Asia", e: "Before 1500", d: "14th c.", k: "deified", tr: ["Hindu", "Islam"], pat: "The lowborn, the sick, the poor",
+    t: "A Rajput prince who championed the lowest castes, worshipped by Hindus as an incarnation of Krishna and by Muslims as a pir. Pilgrims walk across Rajasthan for his annual fair." },
+  { n: "Pabuji", p: "Rajasthan, India", r: "South Asia", e: "Before 1500", d: "14th c.", k: "deified", tr: ["Hindu"], pat: "Camel herders; protection of livestock",
+    t: "A warrior who died defending a woman's cattle, worshipped by herding communities. Priests called bhopas perform his epic overnight in front of a painted scroll called a phad." },
+  { n: "Gogaji", a: "Goga Pir, Jahar Veer", p: "Rajasthan, Punjab, Haryana", r: "South Asia", e: "Before 1500", d: "Medieval", k: "deified", tr: ["Hindu", "Islam", "Sikh"], pat: "Protection from snakebite",
+    t: "A warrior hero known as Goga Pir to Muslims and Goga Ji to Hindus, invoked against snakebite across north India." },
+  { n: "Shirdi Sai Baba", p: "Shirdi, Maharashtra, India", r: "South Asia", e: "1900–1999", d: "d. 1918", k: "folk", tr: ["Hindu", "Islam"], pat: "Faith and patience",
+    t: "A fakir revered by both Hindus and Muslims. His shrine is one of India's most visited pilgrimage sites." },
+  { n: "Bullet Baba", a: "Om Banna, Om Singh Rathore", p: "Chotila, Pali district, Rajasthan, India", r: "South Asia", e: "1900–1999", d: "d. 1988", k: "deified", tr: ["Hindu"], pat: "Safe travel on the highway",
+    t: "A young man killed when his Royal Enfield Bullet crashed. Locals say the bike kept returning to the crash site after police took it, so they built a shrine around it. Drivers stop to offer liquor, flowers, and red thread." },
+  { n: "Baba Harbhajan Singh", p: "Near Nathu La, Sikkim, India", r: "South Asia", e: "1900–1999", d: "d. 1968", k: "folk", tr: ["Sikh", "Hindu"], pat: "Soldiers on the China border",
+    t: "An Indian Army sepoy who died near Nathu La. Soldiers say his spirit still guards the pass, and the army keeps his memorial shrine, changing his uniform and bedsheets." },
+
+  // ======== East & Southeast Asia
+  { n: "Mazu", a: "Lin Moniang, Tianhou", p: "Fujian, China; Taiwan; coastal Asia", r: "East & Southeast Asia", e: "Before 1500", d: "10th c.", k: "deified", tr: ["Chinese folk & Taoist", "Buddhist"], pat: "Sailors and fishermen",
+    t: "A fisherman's daughter said to rescue people at sea, deified after her death and later given imperial titles. Taiwan's Mazu pilgrimages draw huge crowds every year." },
+  { n: "Guan Yu", a: "Guan Gong, Guandi", p: "China and the Chinese diaspora", r: "East & Southeast Asia", e: "Before 1500", d: "Deified over centuries", k: "deified", tr: ["Chinese folk & Taoist", "Buddhist"], pat: "Loyalty, police, business, and gangs alike",
+    t: "A third-century general turned god of war and righteousness. His red-faced statue guards police stations and restaurants alike." },
+  { n: "Ji Gong", a: "Daoji, the Mad Monk", p: "Hangzhou, China; Taiwan; Southeast Asia", r: "East & Southeast Asia", e: "Before 1500", d: "12th c.", k: "deified", tr: ["Buddhist", "Chinese folk & Taoist"], pat: "The poor; sudden help",
+    t: "A scruffy monk who drank wine, ate meat, and helped the poor. He is now a popular deity, often channeled by spirit mediums." },
+  { n: "Koxinga", a: "Zheng Chenggong", p: "Tainan, Taiwan", r: "East & Southeast Asia", e: "1500–1899", d: "1662", k: "deified", tr: ["Chinese folk & Taoist"], pat: "Taiwan; loyalty",
+    t: "The Ming loyalist who drove the Dutch out of Taiwan in 1662. He is worshipped there as a god in temples dedicated to him." },
+  { n: "Tua Pek Kong", p: "Malaysia, Singapore, Indonesia", r: "East & Southeast Asia", e: "1500–1899", d: "18th–19th c.", k: "deified", tr: ["Chinese folk & Taoist"], pat: "Prosperity; safety in new lands",
+    t: "A god of prosperity among Southeast Asian Chinese, often linked to pioneering settlers who died far from home. Temples to him stand from Penang to Borneo." },
+  { n: "The Eighteen Lords", a: "Shiba Wang Gong", p: "Shimen, New Taipei, Taiwan", r: "East & Southeast Asia", e: "1500–1899", d: "Qing dynasty", k: "deified", tr: ["Chinese folk & Taoist"], pat: "Gamblers and the night trade",
+    t: "Seventeen drowned sailors and the loyal dog that leapt into their grave. Worshippers say the temple is strongest at night, bring hot food and cigarettes, and rub the dog statues for wealth." },
+  { n: "Sugawara no Michizane", a: "Tenjin", p: "Japan", r: "East & Southeast Asia", e: "Before 1500", d: "10th c.", k: "deified", tr: ["Shinto"], pat: "Students and exam-takers",
+    t: "A scholar-official who died in exile; disasters blamed on his angry spirit led to his deification. Students still visit Tenjin shrines before exams." },
+  { n: "Taira no Masakado", p: "Ōtemachi, Tokyo, Japan", r: "East & Southeast Asia", e: "Before 1500", d: "940", k: "deified", tr: ["Shinto"], pat: "Appeased rebel spirit",
+    t: "A rebel warrior whose head mound sits among Tokyo office towers. Stories of misfortune for anyone who disturbs it have kept it untouched." },
+  { n: "Kōbō Daishi", a: "Kūkai", p: "Kōyasan and Shikoku, Japan", r: "East & Southeast Asia", e: "Before 1500", d: "d. 835", k: "folk", tr: ["Buddhist"], pat: "Pilgrims",
+    t: "The founder of Shingon Buddhism, believed by followers to be in eternal meditation in his mausoleum, where monks bring him meals each day. Pilgrims on the 88-temple Shikoku route are said to walk with him." },
+  { n: "General Choe Yeong", p: "Korea", r: "East & Southeast Asia", e: "Before 1500", d: "d. 1388", k: "deified", tr: ["East & Southeast Asian spirit traditions"], pat: "Protection; shamans' power",
+    t: "A Goryeo general executed in 1388, now one of the most important spirits in Korean shamanism, called on by mudang in their rituals." },
+  { n: "Trần Hưng Đạo", a: "Đức Thánh Trần", p: "Vietnam", r: "East & Southeast Asia", e: "Before 1500", d: "13th c.", k: "deified", tr: ["East & Southeast Asian spirit traditions"], pat: "Protection from evil spirits; national defense",
+    t: "The general who repelled the Mongol invasions, worshipped in Vietnamese spirit-medium traditions as a powerful exorcising saint." },
+  { n: "Liễu Hạnh", a: "Mother Liễu", p: "Vietnam", r: "East & Southeast Asia", e: "1500–1899", d: "16th c. legend", k: "deified", tr: ["East & Southeast Asian spirit traditions"], pat: "Women, prosperity",
+    t: "A heavenly princess exiled to earth, one of Vietnam's Four Immortals and central to the Mother Goddess religion, whose mediums dance in trance in her honor." },
+  { n: "Min Kyawzwa", a: "One of the 37 Nats", p: "Mount Popa and across Myanmar", r: "East & Southeast Asia", e: "Before 1500", d: "Pantheon set 11th c.", k: "deified", tr: ["East & Southeast Asian spirit traditions", "Buddhist"], pat: "Drinkers, cockfighters, good times",
+    t: "Myanmar's 37 Nats are mostly humans who died violent deaths. Min Kyawzwa, a hard-drinking, cockfighting prince, is offered liquor and cigarettes by his followers." },
+  { n: "Luang Pu Thuat", p: "Thailand", r: "East & Southeast Asia", e: "1500–1899", d: "16th–17th c. legend", k: "folk", tr: ["Buddhist"], pat: "Safety, especially at sea",
+    t: "A legendary monk said to have turned seawater fresh to save a ship's crew. His image is one of Thailand's most common protective amulets." },
+  { n: "Somdet Toh", p: "Wat Rakhang, Bangkok, Thailand", r: "East & Southeast Asia", e: "1500–1899", d: "d. 1872", k: "folk", tr: ["Buddhist"], pat: "Protection, good fortune",
+    t: "A 19th-century Bangkok monk whose clay Phra Somdej amulets are among the most prized, and most counterfeited, objects in Thailand." },
+  { n: "Mae Nak", a: "Mae Nak Phra Khanong", p: "Wat Mahabut, Bangkok, Thailand", r: "East & Southeast Asia", e: "1500–1899", d: "19th c. legend", k: "folk", tr: ["Buddhist", "East & Southeast Asian spirit traditions"], pat: "Safe childbirth, luck, escaping the draft",
+    t: "The ghost of a woman who died in childbirth while her husband was at war. Visitors leave dresses, makeup, and toys for her baby, and some young men pray to her to avoid conscription." },
+  { n: "King Chulalongkorn", a: "Rama V", p: "Bangkok, Thailand", r: "East & Southeast Asia", e: "1900–1999", d: "Cult from the 1990s", k: "political", tr: ["Buddhist"], pat: "Success, prosperity",
+    t: "Thailand's reforming king became the focus of a popular cult in the 1990s. Worshippers bring flowers and incense to his equestrian statue, especially on Tuesdays." },
+  { n: "José Rizal", p: "Philippines", r: "East & Southeast Asia", e: "1900–1999", d: "d. 1896", k: "deified", tr: ["Other Christian"], pat: "National liberation",
+    t: "The executed national hero is venerated by Rizalista sects, some of which regard him as a messiah or an incarnation of Christ." },
+
+  // ======== Mexico & Central America
+  { n: "San Pascualito Rey", p: "Guatemala; Chiapas, Mexico", r: "Mexico & Central America", e: "1500–1899", d: "Linked to a 1650 epidemic", k: "folk", tr: ["Catholic", "Indigenous & syncretic"], pat: "Healing; a peaceful death",
+    t: "A crowned skeleton tied to visions of Saint Paschal Baylon. The Church tried to suppress the image; it survives in chapels and home altars." },
+  { n: "Teresita Urrea", a: "La Santa de Cabora", p: "Sonora, Mexico; Arizona", r: "Mexico & Central America", e: "1500–1899", d: "1890s", k: "folk", tr: ["Catholic"], pat: "Healing; the oppressed",
+    t: "A teenage healer whose followers rose up against the Porfirio Díaz government. She was exiled to the US, still drawing crowds." },
+  { n: "Jesús Malverde", p: "Culiacán, Sinaloa, Mexico", r: "Mexico & Central America", e: "1900–1999", d: "Said hanged 1909", k: "folk", tr: ["Catholic"], pat: "The poor; also, notoriously, drug traffickers",
+    t: "A bandit said to rob the rich for the poor, whose existence is unproven. His Culiacán chapel draws migrants, laborers, and narcos alike." },
+  { n: "Juan Soldado", a: "Juan Castillo Morales", p: "Tijuana, Mexico", r: "Mexico & Central America", e: "1900–1999", d: "1938", k: "folk", tr: ["Catholic"], pat: "Migrants crossing the border",
+    t: "A young soldier executed for the rape and murder of a girl, a crime many believe was pinned on him. His graveside shrine is papered with thank-you notes." },
+  { n: "Niño Fidencio", a: "José Fidencio Constantino Síntora", p: "Espinazo, Nuevo León, Mexico", r: "Mexico & Central America", e: "1900–1999", d: "d. 1938", k: "folk", tr: ["Catholic", "Spiritist"], pat: "Healing",
+    t: "A healer whose followers, the fidencistas, still hold pilgrimages and channel him through mediums called cajitas." },
+  { n: "Pancho Villa", p: "Northern Mexico; US border", r: "Mexico & Central America", e: "1900–1999", d: "d. 1923", k: "political", tr: ["Spiritist"], pat: "Protection, justice, luck",
+    t: "The revolutionary general appears in Spiritist rituals and on prayer cards, petitioned like a saint for courage and protection." },
+  { n: "Maximón", a: "San Simón", p: "Santiago Atitlán, San Andrés Itzapa, Guatemala", r: "Mexico & Central America", e: "1900–1999", d: "Older Maya roots", k: "folk", tr: ["Indigenous & syncretic", "Catholic"], pat: "Business, love, revenge, favors of all kinds",
+    t: "A Maya-Catholic figure in a hat and suit who receives cigars, liquor, and cash. His keepers move him between households each year." },
+  { n: "Santa Muerte", a: "La Flaca, La Niña Blanca", p: "Tepito, Mexico City; US", r: "Mexico & Central America", e: "2000–now", d: "Public shrine 2001", k: "folk", tr: ["Catholic"], pat: "Protection, love, safe passage, a good death",
+    t: "Older private devotion went public when a Tepito woman put a life-size figure outside her home. Now among the fastest-growing devotions in the Americas, condemned by the Vatican." },
+  { n: "San Judas Tadeo (folk)", p: "San Hipólito, Mexico City", r: "Mexico & Central America", e: "2000–now", d: "The 28th of every month", k: "folk", tr: ["Catholic"], pat: "Lost causes, the urban young",
+    t: "An official apostle reshaped by youth culture: on the 28th of every month, crowds carry statues of him to San Hipólito church." },
+
+  // ======== South America
+  { n: "Difunta Correa", a: "Deolinda Correa", p: "Vallecito, San Juan, Argentina", r: "South America", e: "1500–1899", d: "c. 1840s", k: "folk", tr: ["Catholic"], pat: "Travelers, truck drivers, mothers",
+    t: "Said to have died of thirst following her conscripted husband, while her baby survived at her breast. Roadside shrines are stacked with water bottles." },
+  { n: "Gauchito Gil", a: "Antonio Mamerto Gil Núñez", p: "Mercedes, Corrientes, Argentina", r: "South America", e: "1500–1899", d: "Feast 8 January", k: "folk", tr: ["Catholic"], pat: "Justice, protection, travelers",
+    t: "A deserter executed by police; legend says he told his executioner to pray in his name to save his own sick son. Red flags mark his shrines on highways nationwide." },
+  { n: "San La Muerte", p: "Paraguay; northeast Argentina", r: "South America", e: "1500–1899", d: "Guaraní–Jesuit roots", k: "folk", tr: ["Catholic", "Indigenous & syncretic"], pat: "A good death; protection",
+    t: "A skeletal saint, often carved as a small bone amulet, sometimes embedded under the skin. Distinct from Mexico's Santa Muerte, though often compared." },
+  { n: "Pancho Sierra", p: "Pergamino, Argentina", r: "South America", e: "1500–1899", d: "d. 1891", k: "folk", tr: ["Catholic", "Spiritist"], pat: "Healing",
+    t: "A wealthy rancher turned healer known as the 'holy gaucho,' who cured with water and prayer. His tomb is still a pilgrimage site." },
+  { n: "Las Ñatitas", p: "La Paz, Bolivia", r: "South America", e: "1500–1899", d: "Festival 8 November", k: "folk", tr: ["Indigenous & syncretic", "Catholic"], pat: "Household protection, luck",
+    t: "Human skulls kept in homes as family protectors. Once a year they are crowned with flowers, given cigarettes and sunglasses, and brought to the cemetery." },
+  { n: "Escrava Anastácia", p: "Brazil", r: "South America", e: "1500–1899", d: "Image spread from 1968", k: "folk", tr: ["Catholic", "Afro-diasporic"], pat: "The suffering and the wronged",
+    t: "An enslaved woman shown wearing an iron face mask. Her history is unproven, but she is one of Brazil's most beloved unofficial saints." },
+  { n: "Sarita Colonia", p: "Callao, Peru", r: "South America", e: "1900–1999", d: "d. 1940", k: "folk", tr: ["Catholic"], pat: "Migrants, the poor, sex workers, truckers",
+    t: "A young Andean migrant who died poor in Lima. Her image is everywhere from taxi dashboards to prison walls." },
+  { n: "Romualdito", a: "Romualdo Ibáñez", p: "Santiago, Chile", r: "South America", e: "1900–1999", d: "1933", k: "folk", tr: ["Catholic"], pat: "Help with everyday troubles",
+    t: "A young man murdered near Estación Central. His animita, a small roadside shrine, is covered in plaques thanking him for favors." },
+  { n: "Eva Perón", a: "Santa Evita", p: "Argentina", r: "South America", e: "1900–1999", d: "d. 1952", k: "political", tr: ["Catholic", "Secular & internet"], pat: "The working poor, the descamisados",
+    t: "After her death supporters built altars, called her a saint, and petitioned Rome for her canonization." },
+  { n: "Ceferino Namuncurá", p: "Patagonia, Argentina", r: "South America", e: "1900–1999", d: "d. 1905", k: "later", tr: ["Catholic"], pat: "Students, the Mapuche, Patagonia",
+    t: "The son of a Mapuche chief who died young studying for the priesthood. Decades of popular devotion led to his beatification in 2007." },
+  { n: "Padre Cícero", p: "Juazeiro do Norte, Brazil", r: "South America", e: "1900–1999", d: "d. 1934", k: "suppressed", tr: ["Catholic"], pat: "The poor of Brazil's northeast",
+    t: "A priest disciplined by the Church after a reported Eucharistic miracle, revered by millions anyway. The Church has since moved to rehabilitate him." },
+  { n: "José Gregorio Hernández", p: "Venezuela", r: "South America", e: "1900–1999", d: "d. 1919", k: "later", tr: ["Catholic", "Spiritist"], pat: "The sick; doctors",
+    t: "The 'doctor of the poor' was venerated for a century, even in the María Lionza spirit cult, before his canonization on 19 October 2025." },
+  { n: "María Lionza", p: "Sorte mountain, Yaracuy, Venezuela", r: "South America", e: "1900–1999", d: "Indigenous roots", k: "folk", tr: ["Indigenous & syncretic", "Afro-diasporic", "Spiritist"], pat: "Nature, love, protection",
+    t: "A goddess-like figure riding a tapir, at the center of a spirit court that includes Indigenous chiefs, Afro-Venezuelan figures, and liberators." },
+  { n: "Zé Pelintra", p: "Brazil", r: "South America", e: "1900–1999", d: "Umbanda", k: "folk", tr: ["Afro-diasporic"], pat: "Gamblers, hustlers, the street",
+    t: "A dapper spirit in a white suit and Panama hat, the patron of the malandro (street hustler) in Umbanda and related traditions." },
+  { n: "Che Guevara", a: "San Ernesto de La Higuera", p: "Vallegrande, Bolivia", r: "South America", e: "1900–1999", d: "d. 1967", k: "political", tr: ["Catholic", "Secular & internet"], pat: "Help in hardship",
+    t: "Villagers near where he was executed pray to his image and credit him with favors, alongside his global life as a revolutionary icon." },
+  { n: "Diego Maradona", a: "Iglesia Maradoniana", p: "Rosario, Argentina", r: "South America", e: "1900–1999", d: "Church founded 1998", k: "meme", tr: ["Secular & internet"], pat: "Football",
+    t: "Fans founded a half-joking church with its own commandments and calendar, celebrating Christmas on his birthday, 30 October." },
+  { n: "Gilda", a: "Myriam Alejandra Bianchi", p: "Argentina", r: "South America", e: "1900–1999", d: "d. 1996", k: "political", tr: ["Catholic", "Secular & internet"], pat: "Healing; the hopeful",
+    t: "A cumbia singer killed in a bus crash. Within years fans credited her with miracles and built a roadside shrine at the crash site." },
+  { n: "Rodrigo Bueno", p: "Argentina", r: "South America", e: "2000–now", d: "d. 2000", k: "political", tr: ["Catholic", "Secular & internet"], pat: "Fans and night drivers",
+    t: "A cuarteto star killed in a car crash, whose highway shrine draws a steady stream of fans and offerings." },
+
+  // ======== Caribbean & North America
+  { n: "Saint Expedite", a: "Saint Expeditus", p: "New Orleans, Brazil, Réunion, Chile", r: "Caribbean & North America", e: "1500–1899", d: "Popular 19th c.", k: "folk", tr: ["Catholic", "Afro-diasporic"], pat: "Urgent causes and quick results",
+    t: "A Roman soldier-martyr of doubtful history, usually shown stomping a crow that cries 'tomorrow.' Hugely popular in hoodoo and Creole devotion." },
+  { n: "Marie Laveau", p: "New Orleans, USA", r: "Caribbean & North America", e: "1500–1899", d: "d. 1881", k: "folk", tr: ["Afro-diasporic", "Catholic"], pat: "Favors, love, justice",
+    t: "The city's famous Voodoo queen. Visitors leave offerings at her tomb, long marked with chalked X's, though the practice is discouraged now." },
+  { n: "San Lázaro", a: "Babalú Ayé", p: "El Rincón, Cuba", r: "Caribbean & North America", e: "1500–1899", d: "Pilgrimage 17 December", k: "folk", tr: ["Catholic", "Afro-diasporic"], pat: "The sick, the poor",
+    t: "The crutch-wielding beggar Lazarus of the parable, blended with the Yoruba orisha of disease. Pilgrims crawl to the shrine to fulfil vows." },
+  { n: "Saint John Coltrane", p: "San Francisco, USA", r: "Caribbean & North America", e: "1900–1999", d: "Church founded 1971", k: "folk", tr: ["Other Christian"], pat: "Musicians; spiritual awakening",
+    t: "The jazz saxophonist is the patron of a church in San Francisco that holds services built around 'A Love Supreme.' He was canonized by the African Orthodox Church, not Rome." },
+  { n: "George Floyd", p: "Minneapolis and murals worldwide", r: "Caribbean & North America", e: "2000–now", d: "2020", k: "political", tr: ["Secular & internet"], pat: "Racial justice",
+    t: "Murals around the world showed him with a halo or angel wings, and the intersection where he died became a shrine called George Floyd Square." },
+  { n: "Ruth Bader Ginsburg", a: "'Our Lady of Everlasting Dissent'", p: "USA", r: "Caribbean & North America", e: "2000–now", d: "c. 2019", k: "meme", tr: ["Secular & internet"], pat: "Dissent",
+    t: "A popular Etsy prayer candle sold as part of a line of progressive 'patron saints.'" },
+  { n: "Anthony Fauci", p: "USA", r: "Caribbean & North America", e: "2000–now", d: "2020", k: "meme", tr: ["Secular & internet"], pat: "Public health",
+    t: "Pandemic-era devotional candles bearing his face, part of a wave of political novelty candles that drew criticism from religious conservatives." },
+  { n: "Saint Dolly", p: "USA", r: "Caribbean & North America", e: "2000–now", d: "2010s", k: "meme", tr: ["Secular & internet"], pat: "Kindness, big hair, literacy",
+    t: "Dolly Parton is a staple of celebrity candle makers, and her charity work has fans calling her a living saint." },
+
+  // ======== Online / global
+  { n: "Carlo Acutis", a: "'God's influencer'", p: "Assisi, Italy", r: "Online / global", e: "2000–now", d: "d. 2006", k: "later", tr: ["Catholic", "Secular & internet"], pat: "The internet, computer programmers",
+    t: "A teenage coder buried in jeans and sneakers, adopted online as the unofficial patron of the internet. Canonized in September 2025." },
+  { n: "Saint Corona", p: "Aachen, Germany; online", r: "Online / global", e: "2000–now", d: "Revived 2020", k: "meme", tr: ["Catholic", "Secular & internet"], pat: "Against epidemics (newly assigned)",
+    t: "An obscure early martyr whose name went viral in 2020. Her relics were brought out in Aachen, and the internet made her a pandemic patron." },
+  { n: "Saint Javelin", p: "Ukraine; worldwide", r: "Online / global", e: "2000–now", d: "2022", k: "meme", tr: ["Orthodox Christian", "Secular & internet"], pat: "Ukraine's defenders",
+    t: "An Orthodox-style Madonna cradling an anti-tank missile, adapted from Chris Shaw's 2012 'Madonna Kalashnikov.' Christian Borys's sticker fundraiser grew into a million-dollar charity brand." },
+  { n: "Celebrity prayer candles", p: "Etsy and boutiques, mainly North America", r: "Online / global", e: "2000–now", d: "2010s–now", k: "meme", tr: ["Secular & internet"], pat: "Whatever the fan wants",
+    t: "Seven-day candles, borrowed from botánica culture, printed with comedians, politicians, and pop stars. The Henry Ford museum collected two in 2020." },
+  { n: "Saint Luigi", p: "USA; online", r: "Online / global", e: "2000–now", d: "December 2024", k: "political", tr: ["Secular & internet"], pat: "'Healthcare justice' (as sold)",
+    t: "Within days of Luigi Mangione's arrest for the murder of a health-insurance CEO, saint candles, icons, and prayers bearing his face appeared online. He is charged, not convicted, and the trend has drawn sharp criticism." },
+
+  // ======== Began as art or commentary
+  { n: "Madonna Kalashnikov", p: "Chris Shaw, USA", r: "Online / global", e: "2000–now", d: "2012", k: "art", tr: ["Orthodox Christian", "Secular & internet"], pat: "Armed resistance",
+    t: "Chris Shaw's Orthodox-style icon of the Virgin cradling a gold-leafed AK-47, painted as commentary after the Arab Spring. A Ukrainian designer later swapped the rifle for a Javelin missile, creating Saint Javelin." },
+  { n: "Saint Sentinel", p: "Ukraine", r: "Online / global", e: "2000–now", d: "2020s", k: "art", tr: ["Orthodox Christian", "Secular & internet"], pat: "Protection of Ukraine",
+    t: "A protector icon Chris Shaw painted with the Saint Javelin team for UNITED24, Ukraine's official fundraising platform, and raffled to raise money for the country." },
+  { n: "Madonna con la pistola", a: "Banksy's Madonna with a Gun", p: "Piazza Gerolomini, Naples, Italy", r: "Europe", e: "2000–now", d: "2010", k: "art", tr: ["Catholic", "Secular & internet"], pat: "(Commentary on faith and violence)",
+    t: "Banksy stenciled a Madonna whose halo is replaced by a pistol, right beside a traditional street shrine to the Virgin. It is now kept behind plexiglass, and passersby can mistake it for a real devotional image." },
+  { n: "Yolanda López's Guadalupes", p: "California, USA", r: "Caribbean & North America", e: "1900–1999", d: "1978–88", k: "art", tr: ["Catholic", "Indigenous & syncretic", "Secular & internet"], pat: "Working Mexican and Chicana women",
+    t: "A series that dressed ordinary women in the Virgin of Guadalupe's starred mantle, including the artist herself sprinting out of the frame in running shoes. It became a touchstone of Chicana feminist art." },
+  { n: "Our Lady", a: "Alma López", p: "Santa Fe, New Mexico, USA", r: "Caribbean & North America", e: "2000–now", d: "2001", k: "art", tr: ["Catholic", "Secular & internet"], pat: "Women's bodies and autonomy",
+    t: "A digital collage recasting Guadalupe as a confident modern woman, hands on hips, held up by a bare-breasted butterfly-winged angel. The archbishop led protests; the museum kept it up but cut the exhibit short." },
+  { n: "J. R. \"Bob\" Dobbs", a: "Church of the SubGenius", p: "USA", r: "Caribbean & North America", e: "1900–1999", d: "1979", k: "art", tr: ["Parody & satirical religions"], pat: "Slack",
+    t: "The grinning, pipe-smoking face of a parody church, lifted from 1940s telephone-company clip art. Church lore calls him history's greatest salesman, assassinated in 1984 and risen several times since." },
+  { n: "Flying Spaghetti Monster", a: "Pastafarianism", p: "Kansas, USA; worldwide", r: "Online / global", e: "2000–now", d: "2005", k: "art", tr: ["Parody & satirical religions"], pat: "Pirates, pasta, science classes",
+    t: "Invented in a 2005 open letter mocking the Kansas school board's openness to teaching intelligent design. Followers wear colanders, and the church has won some legal recognition, including officiating marriages in New Zealand." },
+  { n: "Our Lady of Perpetual Exemption", p: "USA", r: "Caribbean & North America", e: "2000–now", d: "2015", k: "art", tr: ["Parody & satirical religions", "Secular & internet"], pat: "Tax exemption",
+    t: "John Oliver set up a real church on Last Week Tonight to show how easily televangelists avoid taxes. He closed it a month later and gave the donations to Doctors Without Borders." }
+];
+
+// English Wikipedia article for each entry, where one exists (checked October 2026).
+const WIKI = {
+  "Saint Guinefort": "Saint Guinefort", "Saint Wilgefortis": "Wilgefortis", "Saint Josaphat": "Barlaam and Josaphat",
+  "Thomas of Lancaster": "Thomas, 2nd Earl of Lancaster", "Simon de Montfort": "Simon de Montfort, 6th Earl of Leicester",
+  "King Henry VI": "Henry VI of England", "Simon of Trent": "Simon of Trent", "Saint Philomena": "Philomena",
+  "Sara-la-Kali": "Saint Sarah", "Xenia of St Petersburg": "Xenia of Saint Petersburg", "Matrona of Moscow": "Matrona Nikonova",
+  "Padre Pio": "Padre Pio", "Princess Diana": "Diana, Princess of Wales", "John Paul II": "Pope John Paul II",
+  "Kimpa Vita": "Kimpa Vita", "Simon Kimbangu": "Simon Kimbangu", "Amadou Bamba": "Amadou Bamba", "Al-Khidr": "Khidr",
+  "Sayyida Zaynab": "Zaynab bint Ali", "Bouya Omar": "Bouya Omar", "Rabbi Amram Ben Diwan": "Amram ben Diwan",
+  "Rabbi Shimon bar Yochai": "Shimon bar Yochai", "Baba Sali": "Baba Sali", "Rabbi Nachman of Breslov": "Nachman of Breslov",
+  "Data Ganj Bakhsh": "Ali al-Hujwiri", "Nizamuddin Auliya": "Nizamuddin Auliya", "Lal Shahbaz Qalandar": "Lal Shahbaz Qalandar",
+  "Sakhi Sarwar": "Sakhi Sarwar", "Ramdev Pir": "Ramdev Pir", "Pabuji": "Pabuji", "Gogaji": "Gogaji",
+  "Shirdi Sai Baba": "Sai Baba of Shirdi", "Bullet Baba": "Om Banna", "Baba Harbhajan Singh": "Baba Harbhajan Singh",
+  "Mazu": "Mazu", "Guan Yu": "Guan Yu", "Ji Gong": "Ji Gong", "Koxinga": "Koxinga", "Tua Pek Kong": "Tua Pek Kong",
+  "The Eighteen Lords": "Temple of the Eighteen Lords", "Sugawara no Michizane": "Sugawara no Michizane",
+  "Taira no Masakado": "Taira no Masakado", "Kōbō Daishi": "Kūkai", "General Choe Yeong": "Ch'oe Yŏng",
+  "Trần Hưng Đạo": "Trần Hưng Đạo", "Liễu Hạnh": "Liễu Hạnh", "Min Kyawzwa": "Min Kyawzwa", "Luang Pu Thuat": "Luang Pu Thuat",
+  "Somdet Toh": "Somdet To Brahmaramsi", "Mae Nak": "Mae Nak Phra Khanong", "King Chulalongkorn": "Chulalongkorn",
+  "José Rizal": "Rizalista religious movements", "San Pascualito Rey": "San Pascualito", "Teresita Urrea": "Teresa Urrea",
+  "Jesús Malverde": "Jesús Malverde", "Juan Soldado": "Juan Soldado", "Niño Fidencio": "Niño Fidencio", "Pancho Villa": "Pancho Villa",
+  "Maximón": "Maximón", "Santa Muerte": "Santa Muerte", "San Judas Tadeo (folk)": "Church of San Hipólito",
+  "Difunta Correa": "Difunta Correa", "Gauchito Gil": "Gauchito Gil", "San La Muerte": "San La Muerte", "Las Ñatitas": "Ñatita",
+  "Escrava Anastácia": "Escrava Anastacia", "Sarita Colonia": "Sarita Colonia", "Eva Perón": "Eva Perón",
+  "Ceferino Namuncurá": "Ceferino Namuncurá", "Padre Cícero": "Padre Cícero", "José Gregorio Hernández": "José Gregorio Hernández",
+  "María Lionza": "María Lionza", "Zé Pelintra": "Zé Pilintra", "Che Guevara": "Che Guevara", "Diego Maradona": "Iglesia Maradoniana",
+  "Gilda": "Gilda (Argentine singer)", "Rodrigo Bueno": "Rodrigo (musician)", "Saint Expedite": "Expeditus", "Marie Laveau": "Marie Laveau",
+  "San Lázaro": "Babalú-Ayé", "Saint John Coltrane": "African Orthodox Church", "George Floyd": "George Floyd Square",
+  "Ruth Bader Ginsburg": "Ruth Bader Ginsburg", "Anthony Fauci": "Anthony Fauci", "Saint Dolly": "Dolly Parton",
+  "Carlo Acutis": "Carlo Acutis", "Saint Corona": "Victor and Corona", "Saint Javelin": "Saint Javelin", "Saint Luigi": "Killing of Brian Thompson",
+  "Madonna Kalashnikov": "Saint Javelin", "Saint Sentinel": "Saint Javelin", "Madonna con la pistola": "Banksy",
+  "Yolanda López's Guadalupes": "Yolanda López", "Our Lady": "Alma López", "J. R. \"Bob\" Dobbs": "J. R. \"Bob\" Dobbs",
+  "Flying Spaghetti Monster": "Flying Spaghetti Monster", "Our Lady of Perpetual Exemption": "Our Lady of Perpetual Exemption"
+};
+const wikiUrl = title => "https://en.wikipedia.org/wiki/" + encodeURIComponent(title.replace(/ /g, "_")).replace(/%2C/g, ",").replace(/%27/g, "'");
+
+const $ = id => document.getElementById(id);
+const state = { kinds: new Set(), trad: "", region: "", era: "", q: "" };
+try {
+  const saved = JSON.parse(localStorage.getItem("fs-filters") || "null");
+  if (saved) {
+    if (TRADS.includes(saved.trad)) state.trad = saved.trad;
+    if (REGIONS.includes(saved.region)) state.region = saved.region;
+    if (ERAS.includes(saved.era)) state.era = saved.era;
+    (saved.kinds || []).forEach(k => KINDS[k] && state.kinds.add(k));
+  }
+} catch (e) {}
+function save() { try { localStorage.setItem("fs-filters", JSON.stringify({ trad: state.trad, region: state.region, era: state.era, kinds: [...state.kinds] })); } catch (e) {} }
+
+const kindsEl = $("kinds");
+const chipEls = {};
+Object.entries(KINDS).forEach(([key, v]) => {
+  const b = document.createElement("button");
+  b.className = "chip"; b.type = "button"; b.id = "kind-" + key;
+  b.style.setProperty("--c", `var(${v.c})`);
+  b.innerHTML = `<span class="dot"></span>${v.label}`;
+  b.addEventListener("click", () => {
+    state.kinds.has(key) ? state.kinds.delete(key) : state.kinds.add(key);
+    save(); render();
+  });
+  chipEls[key] = b;
+  kindsEl.appendChild(b);
+});
+
+function fillSelect(el, label, opts) {
+  el.innerHTML = `<option value="">${label}</option>` + opts.map(o => `<option>${o}</option>`).join("");
+}
+fillSelect($("trad"), "All traditions", TRADS);
+fillSelect($("region"), "All regions", REGIONS);
+fillSelect($("era"), "All eras", ERAS);
+$("trad").addEventListener("change", e => { state.trad = e.target.value; save(); render(); });
+$("region").addEventListener("change", e => { state.region = e.target.value; save(); render(); });
+$("era").addEventListener("change", e => { state.era = e.target.value; save(); render(); });
+$("q").addEventListener("input", e => { state.q = e.target.value.trim().toLowerCase(); render(); });
+$("clear").addEventListener("click", () => {
+  state.kinds.clear(); state.trad = state.region = state.era = state.q = "";
+  $("q").value = ""; save(); render();
+});
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+function render() {
+  Object.entries(chipEls).forEach(([k, b]) => b.setAttribute("aria-pressed", state.kinds.has(k) ? "true" : "false"));
+  $("trad").value = state.trad; $("region").value = state.region; $("era").value = state.era;
+  const any = state.kinds.size || state.trad || state.region || state.era || state.q;
+  $("clear").hidden = !any;
+  const list = S.filter(s =>
+    (!state.kinds.size || state.kinds.has(s.k)) &&
+    (!state.trad || s.tr.includes(state.trad)) &&
+    (!state.region || s.r === state.region) &&
+    (!state.era || s.e === state.era) &&
+    (!state.q || [s.n, s.a, s.p, s.pat, s.t, s.r, s.tr.join(" ")].join(" ").toLowerCase().includes(state.q))
+  ).sort((a, b) => ERAS.indexOf(a.e) - ERAS.indexOf(b.e));
+  $("grid").innerHTML = list.map(s => {
+    const k = KINDS[s.k];
+    return `<article class="card">
+      <div class="meta"><span>${esc(s.d)}</span><span>${esc(s.r)}</span></div>
+      <h2>${esc(s.n)}</h2>
+      ${s.a ? `<div class="alias">${esc(s.a)}</div>` : ""}
+      <div class="patron">${esc(s.pat)}</div>
+      <p class="note">${esc(s.t)}</p>
+      <div class="meta"><span>${esc(s.p)}</span>${WIKI[s.n] ? `<a class="wiki" href="${esc(wikiUrl(WIKI[s.n]))}" target="_blank" rel="noopener" aria-label="Wikipedia article on ${esc(s.n)}">Wikipedia ↗</a>` : ""}</div>
+      <div class="foot">
+        <span class="kind" style="--c: var(${k.c})"><span class="dot"></span>${k.label}</span>
+        <span class="tags">${s.tr.map(t => `<span class="tag">${esc(t)}</span>`).join("")}</span>
+      </div>
+    </article>`;
+  }).join("");
+  $("empty").hidden = list.length > 0;
+  $("count").textContent = `${list.length} of ${S.length}`;
+}
+render();
+</script>
+
+</body></html>
