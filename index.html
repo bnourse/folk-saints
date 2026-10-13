@@ -20,6 +20,7 @@
   --k-meme: #8a4fa3;
   --k-political: #b0661a;
   --k-art: #a03c64;
+  --k-small: #66701c;
   --tag-bg: #e4e8ee;
   --font-display: "IM Fell English", "Iowan Old Style", Georgia, serif;
   --font-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
@@ -29,14 +30,14 @@
   :root:not([data-theme="light"]) {
     --bg: #11141b; --card: #1a1e28; --ink: #e8ebf1; --muted: #9ba3b4; --line: #2c3240;
     --accent: #93acf0; --gold: #d8aa4b; --tag-bg: #232937;
-    --k-folk: #93acf0; --k-deified: #9ab8cc; --k-suppressed: #e58c8c; --k-later: #7fcfae; --k-meme: #cfa2e3; --k-political: #eeac66; --k-art: #f08fb5;
+    --k-folk: #93acf0; --k-deified: #9ab8cc; --k-suppressed: #e58c8c; --k-later: #7fcfae; --k-meme: #cfa2e3; --k-political: #eeac66; --k-art: #f08fb5; --k-small: #c6cf6e;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #11141b; --card: #1a1e28; --ink: #e8ebf1; --muted: #9ba3b4; --line: #2c3240;
   --accent: #93acf0; --gold: #d8aa4b; --tag-bg: #232937;
-  --k-folk: #93acf0; --k-deified: #9ab8cc; --k-suppressed: #e58c8c; --k-later: #7fcfae; --k-meme: #cfa2e3; --k-political: #eeac66; --k-art: #f08fb5;
+  --k-folk: #93acf0; --k-deified: #9ab8cc; --k-suppressed: #e58c8c; --k-later: #7fcfae; --k-meme: #cfa2e3; --k-political: #eeac66; --k-art: #f08fb5; --k-small: #c6cf6e;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -107,6 +108,7 @@ footer h3 { font-family: var(--font-display); font-weight: 400; font-size: 1.3re
   <footer>
     <h3>About this list</h3>
     <p>"Era" is when devotion took hold, not necessarily when the person lived. Dates for legendary figures are traditional. A figure honored across faiths carries every tradition that honors it, so it shows up under each one.</p>
+    <p>"Small gods" borrows Terry Pratchett's idea that gods are made by belief: they start small, attached to one rock, tree, or statue, and grow or fade with the number of people who believe in them. Here it covers holy things that were never people.</p>
     <p>"Suppressed or de-listed" and "Popular first, canonized later" refer to the relevant religious or civil authority: usually the Catholic or Orthodox Church, sometimes a state.</p>
     <p>Left out on purpose: the online "saints" culture that venerates mass shooters. It is documented by extremism researchers, but listing those names would serve its purpose.</p>
   </footer>
@@ -116,15 +118,16 @@ footer h3 { font-family: var(--font-display); font-weight: 400; font-size: 1.3re
 const KINDS = {
   folk:       { label: "Folk devotion",                  c: "--k-folk" },
   deified:    { label: "Became gods or spirits",         c: "--k-deified" },
+  small:      { label: "Small gods",                     c: "--k-small" },
   later:      { label: "Popular first, canonized later", c: "--k-later" },
   suppressed: { label: "Suppressed or de-listed",        c: "--k-suppressed" },
   political:  { label: "Political & celebrity",          c: "--k-political" },
   meme:       { label: "Meme, ironic & merch",           c: "--k-meme" },
   art:        { label: "Began as art or commentary",     c: "--k-art" }
 };
-const TRADS = ["Catholic", "Orthodox Christian", "Other Christian", "Islam", "Judaism", "Hindu", "Sikh", "Buddhist", "Chinese folk & Taoist", "Shinto", "East & Southeast Asian spirit traditions", "Afro-diasporic", "Indigenous & syncretic", "Spiritist", "Parody & satirical religions", "Secular & internet"];
+const TRADS = ["Catholic", "Orthodox Christian", "Other Christian", "Islam", "Judaism", "Hindu", "Sikh", "Buddhist", "Chinese folk & Taoist", "Shinto", "East & Southeast Asian spirit traditions", "Afro-diasporic", "Indigenous & syncretic", "European folk & fairy belief", "Spiritist", "Parody & satirical religions", "Secular & internet"];
 const ERAS = ["Before 1500", "1500–1899", "1900–1999", "2000–now"];
-const REGIONS = ["Mexico & Central America", "South America", "Caribbean & North America", "Europe", "Africa", "Middle East & North Africa", "South Asia", "East & Southeast Asia", "Online / global"];
+const REGIONS = ["Mexico & Central America", "South America", "Caribbean & North America", "Europe", "Africa", "Middle East & North Africa", "South Asia", "East & Southeast Asia", "Oceania", "Online / global"];
 
 const S = [
   // ======== Christian Europe
@@ -332,6 +335,34 @@ const S = [
   { n: "Saint Luigi", p: "USA; online", r: "Online / global", e: "2000–now", d: "December 2024", k: "political", tr: ["Secular & internet"], pat: "'Healthcare justice' (as sold)",
     t: "Within days of Luigi Mangione's arrest for the murder of a health-insurance CEO, saint candles, icons, and prayers bearing his face appeared online. He is charged, not convicted, and the trend has drawn sharp criticism." },
 
+  // ======== Oceania
+  { n: "Prince Philip", a: "The Prince Philip movement", p: "Yaohnanen and Yakel, Tanna, Vanuatu", r: "Oceania", e: "1900–1999", d: "1950s–60s onward", k: "deified", tr: ["Indigenous & syncretic"], pat: "Kastom, the traditional way of life",
+    t: "Villagers on Tanna tied a legend of a mountain spirit's son, who left to marry a powerful woman across the sea, to the Queen's husband. Philip sent them signed photographs, one showing him holding a club they had sent him. When he died in 2021 they mourned him, and their devotion was expected to pass to King Charles." },
+
+  // ======== Small gods: holy things that were never people
+  { n: "Billiken", p: "Tsutenkaku tower, Osaka, Japan", r: "East & Southeast Asia", e: "1900–1999", d: "Patented 1908", k: "small", tr: ["East & Southeast Asian spirit traditions", "Secular & internet"], pat: "Luck and wishes",
+    t: "A Kansas City art teacher's good-luck doll, a craze that faded in America but took root in Osaka, where one was enshrined in 1912. Today's statue sits on Tsutenkaku's observation deck; visitors drop a coin in its box and rub its worn-smooth feet to make a wish." },
+  { n: "Erawan Shrine", a: "Thao Maha Phrom", p: "Ratchaprasong, Bangkok, Thailand", r: "East & Southeast Asia", e: "1900–1999", d: "1956", k: "small", tr: ["Buddhist", "Hindu"], pat: "Wishes of every kind",
+    t: "Built on an astrologer's advice to end a run of bad luck at a hotel building site: injured workers, cost overruns, a lost shipload of marble. Its Brahma statue is now one of Bangkok's busiest shrines, where people whose prayers came true pay troupes of dancers to perform." },
+  { n: "Chao Mae Tuptim", p: "Behind a hotel by Khlong Saen Saep, Bangkok, Thailand", r: "East & Southeast Asia", e: "1900–1999", d: "Early 20th c.", k: "small", tr: ["Buddhist", "East & Southeast Asian spirit traditions"], pat: "Fertility",
+    t: "A spirit house the businessman Nai Lert found floating in a canal and set on the bank of his estate. Women hoping to conceive brought offerings, and those whose wishes came true returned with carved wooden phalluses, eventually well over a hundred of them." },
+  { n: "Zigu", a: "Maogu, the toilet goddess", p: "China", r: "East & Southeast Asia", e: "Before 1500", d: "Tang dynasty or earlier", k: "small", tr: ["Chinese folk & Taoist"], pat: "Latrines; fortune-telling",
+    t: "Said to be the ghost of a concubine abused by a jealous wife and killed in the privy. Women and girls invoked her at the Lantern Festival to tell their fortunes." },
+  { n: "The Colonel of Dōtonbori", a: "The Curse of the Colonel", p: "Dōtonbori, Osaka, Japan", r: "East & Southeast Asia", e: "1900–1999", d: "1985", k: "small", tr: ["Secular & internet"], pat: "The Hanshin Tigers (vengefully)",
+    t: "Celebrating fans threw a Colonel Sanders statue into the Dōtonbori River in 1985, and the Tigers' long drought that followed was blamed on his curse. Divers recovered most of the statue in 2009; the team finally won the Japan Series again in 2023." },
+  { n: "Ekeko", p: "La Paz, Bolivia; the Altiplano", r: "South America", e: "Before 1500", d: "Alasitas fair, 24 January", k: "small", tr: ["Indigenous & syncretic"], pat: "Abundance",
+    t: "A little man loaded down with goods, the Altiplano's god of plenty. At La Paz's Alasitas fair people buy miniature houses, cars, and banknotes for him, hoping he will make them real within the year." },
+  { n: "Our Lady of the Underpass", p: "Fullerton Avenue, Chicago, USA", r: "Caribbean & North America", e: "2000–now", d: "2005", k: "small", tr: ["Catholic"], pat: "(A road-salt apparition)",
+    t: "A salt stain under the Kennedy Expressway that passersby saw as the Virgin Mary. Candles, flowers, and pilgrims followed. The state transportation department put it down to road-salt runoff, and the image has been vandalized and cleaned up again." },
+  { n: "Latoon fairy bush", p: "Latoon, County Clare, Ireland", r: "Europe", e: "1900–1999", d: "1999", k: "small", tr: ["European folk & fairy belief"], pat: "The fairies' right of way",
+    t: "A lone whitethorn in the path of a new road. Storyteller Eddie Lenihan warned that harming a fairy bush brings misfortune, the story spread far beyond Ireland, and the bush was spared." },
+  { n: "Ófeigskirkja", a: "The elf church", p: "Gálgahraun lava field, near Reykjavík, Iceland", r: "Europe", e: "2000–now", d: "Moved 2015", k: "small", tr: ["European folk & fairy belief"], pat: "Iceland's hidden people",
+    t: "A seer said this boulder was a church of the hidden people, and protesters tried to stop a road through the lava field. The road went ahead, but in 2015 the road authority moved the rock to the roadside rather than destroy it." },
+  { n: "Clootie wells", p: "Munlochy, Scotland; Madron, Cornwall; Ireland", r: "Europe", e: "Before 1500", d: "Ancient; still in use", k: "small", tr: ["European folk & fairy belief", "Catholic"], pat: "Healing",
+    t: "Holy wells where people dip a strip of cloth, tie it to a nearby tree with a prayer, and expect the illness to fade as the rag rots. Most wells now belong to a saint, but the spirit in the water is older." },
+  { n: "Ceiling Cat", p: "Online", r: "Online / global", e: "2000–now", d: "c. 2007", k: "small", tr: ["Parody & satirical religions", "Secular & internet"], pat: "Watching you",
+    t: "A cat peering down through a hole in the ceiling became the all-seeing god of the lolcat universe, opposed by Basement Cat. A crowdsourced project translated the Bible into lolspeak with Ceiling Cat in the leading role." },
+
   // ======== Began as art or commentary
   { n: "Madonna Kalashnikov", p: "Chris Shaw, USA", r: "Online / global", e: "2000–now", d: "2012", k: "art", tr: ["Orthodox Christian", "Secular & internet"], pat: "Armed resistance",
     t: "Chris Shaw's Orthodox-style icon of the Virgin cradling a gold-leafed AK-47, painted as commentary after the Arab Spring. A Ukrainian designer later swapped the rifle for a Javelin missile, creating Saint Javelin." },
@@ -382,7 +413,10 @@ const WIKI = {
   "Carlo Acutis": "Carlo Acutis", "Saint Corona": "Victor and Corona", "Saint Javelin": "Saint Javelin", "Saint Luigi": "Killing of Brian Thompson",
   "Madonna Kalashnikov": "Saint Javelin", "Saint Sentinel": "Saint Javelin", "Madonna con la pistola": "Banksy",
   "Yolanda López's Guadalupes": "Yolanda López", "Our Lady": "Alma López", "J. R. \"Bob\" Dobbs": "J. R. \"Bob\" Dobbs",
-  "Flying Spaghetti Monster": "Flying Spaghetti Monster", "Our Lady of Perpetual Exemption": "Our Lady of Perpetual Exemption"
+  "Flying Spaghetti Monster": "Flying Spaghetti Monster", "Our Lady of Perpetual Exemption": "Our Lady of Perpetual Exemption",
+  "Prince Philip": "Prince Philip movement", "Billiken": "Billiken", "Erawan Shrine": "Erawan Shrine", "Chao Mae Tuptim": "Chao Mae Tuptim shrine",
+  "Zigu": "Zigu", "The Colonel of Dōtonbori": "Curse of the Colonel", "Ekeko": "Ekeko", "Our Lady of the Underpass": "Our Lady of the Underpass",
+  "Latoon fairy bush": "Eddie Lenihan", "Ófeigskirkja": "Huldufólk", "Clootie wells": "Clootie well", "Ceiling Cat": "Lolcat"
 };
 const wikiUrl = title => "https://en.wikipedia.org/wiki/" + encodeURIComponent(title.replace(/ /g, "_")).replace(/%2C/g, ",").replace(/%27/g, "'");
 
