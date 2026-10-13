@@ -423,7 +423,9 @@ fillSelect($("era"), "All eras", ERAS);
 $("trad").addEventListener("change", e => { state.trad = e.target.value; save(); render(); });
 $("region").addEventListener("change", e => { state.region = e.target.value; save(); render(); });
 $("era").addEventListener("change", e => { state.era = e.target.value; save(); render(); });
-$("q").addEventListener("input", e => { state.q = e.target.value.trim().toLowerCase(); render(); });
+// Accent-insensitive: "maria" matches "María", "dao" matches "Đạo".
+const fold = s => s.normalize("NFD").replace(/\p{M}/gu, "").replace(/đ/gi, "d").toLowerCase();
+$("q").addEventListener("input", e => { state.q = fold(e.target.value.trim()); render(); });
 $("clear").addEventListener("click", () => {
   state.kinds.clear(); state.trad = state.region = state.era = state.q = "";
   $("q").value = ""; save(); render();
@@ -441,7 +443,7 @@ function render() {
     (!state.trad || s.tr.includes(state.trad)) &&
     (!state.region || s.r === state.region) &&
     (!state.era || s.e === state.era) &&
-    (!state.q || [s.n, s.a, s.p, s.pat, s.t, s.r, s.tr.join(" ")].join(" ").toLowerCase().includes(state.q))
+    (!state.q || fold([s.n, s.a, s.p, s.pat, s.t, s.r, s.tr.join(" ")].join(" ")).includes(state.q))
   ).sort((a, b) => ERAS.indexOf(a.e) - ERAS.indexOf(b.e));
   $("grid").innerHTML = list.map(s => {
     const k = KINDS[s.k];
